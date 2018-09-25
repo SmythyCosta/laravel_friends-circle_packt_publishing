@@ -1,48 +1,93 @@
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
 
 
-# Register
+# Auth
 
-Install JWT and user registry:
+user authentication:
 
-# 1 - JWT
+## 1 - Model User
+	#import
+		use Tymon\JWTAuth\Contracts\JWTSubject;
+	
+	#implements JWTSubject
+		class User extends Authenticatable implements JWTSubject
 
-## 1.1 Install jwt
-	composer require tymon/jwt-auth:dev-develop --prefer -source
+	#functions
+		function getJWTIdentifier();
+		function getJWTCustomClaims();
 
-## 1.2 declare in app 
-	config/app.php
-		providers[]/ aliases[]
-		
-		#providers[]
-			Tymon\JWTAuth\Providers\LaravelServiceProvider::class
+## 2 - config/auth.php
+	'defaults' => [
+        'guard' => 'api',
+        'passwords' => 'users',
+    ],
 
-		#aliases[]
-			'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class, 
-        	'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
+    'guards' => [
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'users',
+        ],
+    ],
 
-## 1.3 declare in kernel
-	app/Http/Kernel.php
-		$routeMiddleware 
-			'jwt.auth' => 'Tymon\JWTAuth\Middleware\GetUserFromToken',
-        	'jwt.refresh' => 'Tymon\JWTAuth\Middleware\RefreshToken',
+## 3 - routes/api.php
+	Route::group([
+	    'middleware' => 'api',
+	    'prefix' => 'auth'
+	], function() {
+	    Route::post('/register', 'AuthController@register');
+	    Route::post('/login', 'AuthController@login');
+	    Route::get('/me', 'AuthController@me');
+	});
+
+## 4 - config Exceptions
+	namespace Illuminate\Foundation\Exceptions;
+	Handler.php
+
+	protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        return response()->json(['message' => $exception->getMessage()], 401);
+    }
+
+## 5 - AuthController
+	function __construct();
+
+	function login(Request $request);
+
+	function guard();
+
+	function respondWithToken($token);
+
+	function me();
 
 
+# 6 - TEST
+
+	#URL
+		http://127.0.0.1:8000/api/auth/register
+	#BULK EDIT
+		firstName:Smythy
+		lastName:costa
+		email:smythy.costa@email.com
+		password:123456
 
 
-# 2 - Auth Controller
-	AuthController.php
+	#URL
+		http://127.0.0.1:8000/api/auth/login
+	#BULK EDIT
+		//firstName:Smythy
+		//lastName:costa
+		email:smythy.costa@email.com
+		password:123456
+	#RESPONSE
+		{
+		    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE1Mzc4ODc4ODMsImV4cCI6MTUzNzg5MTQ4MywibmJmIjoxNTM3ODg3ODgzLCJqdGkiOiJGajRMRUxKTEIxY2JwTXJyIiwic3ViIjo0LCJwcnYiOiI4N2UwYWYxZWY5ZmQxNTgxMmZkZWM5NzE1M2ExNGUwYjA0NzU0NmFhIn0.iFLo4W0cysfmO16z-Go-cuGNDQP-dYjzkMgjYquHu_Y",
+		    "token_type": "bearer",
+		    "expires_in": 3600
+		}
 
 
-
-
-# 3 - Install cors
-	composer require barryvdh/laravel-cors
-
-## 3.1 declare in kernel
-	app/Http/Kernel.php
-	$middleware 
-		\Barryvdh\Cors\HandleCors::class,
-
-## 3.2 publication at the provider
-	php artisan vendor:publish --provider="Barryvdh\Cors\ServiceProvider"
+	#URL
+		http://127.0.0.1:8000/api/auth/me
+	#BULK EDIT
+		//Content-Type:application/x-www-form-urlencoded
+		Authorization:bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE1Mzc4ODc4ODMsImV4cCI6MTUzNzg5MTQ4MywibmJmIjoxNTM3ODg3ODgzLCJqdGkiOiJGajRMRUxKTEIxY2JwTXJyIiwic3ViIjo0LCJwcnYiOiI4N2UwYWYxZWY5ZmQxNTgxMmZkZWM5NzE1M2ExNGUwYjA0NzU0NmFhIn0.iFLo4W0cysfmO16z-Go-cuGNDQP-dYjzkMgjYquHu_Y
