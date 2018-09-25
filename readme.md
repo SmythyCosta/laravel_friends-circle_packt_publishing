@@ -7,10 +7,10 @@ Install JWT and user registry:
 
 # 1 - JWT
 
-## Install jwt
+## 1.1 Install jwt
 	composer require tymon/jwt-auth:dev-develop --prefer -source
 
-## declare in app 
+## 1.2 declare in app 
 	config/app.php
 		providers[]/ aliases[]
 		
@@ -21,7 +21,7 @@ Install JWT and user registry:
 			'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class, 
         	'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
 
-## declare in kernel
+## 1.3 declare in kernel
 	app/Http/Kernel.php
 		$routeMiddleware 
 			'jwt.auth' => 'Tymon\JWTAuth\Middleware\GetUserFromToken',
@@ -39,10 +39,10 @@ Install JWT and user registry:
 # 3 - Install cors
 	composer require barryvdh/laravel-cors
 
-## declare in kernel
+## 3.1 declare in kernel
 	app/Http/Kernel.php
 	$middleware 
 		\Barryvdh\Cors\HandleCors::class,
 
-## publication at the provider
+## 3.2 publication at the provider
 	php artisan vendor:publish --provider="Barryvdh\Cors\ServiceProvider"
