@@ -9,3 +9,7 @@
 	create Post Migrate
 	create Post Contoller
 	create Post Routes
+
+
+## Test
+	http://127.0.0.1:8000/api/posts
